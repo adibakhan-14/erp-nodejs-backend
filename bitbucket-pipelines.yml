@@ -1,0 +1,37 @@
+# image: node:11.13.0-alpine
+image: node:12.16.1-alpine
+
+pipelines:
+  branches:
+    master:
+      - step:
+          caches:
+            - node
+          script:
+            - npm i
+            - npm run cred:prod
+            - npm run deploy:prod
+    dev:
+      - step:
+          caches:
+            - node
+          script:
+            - npm i
+            - npm run cred:dev
+            - npm run deploy:dev
+    staging:
+      - step:
+          caches:
+            - node
+          script:
+            - npm i
+            - npm run cred:stage
+            - npm run deploy:stage
+    test:
+      - step:
+          caches:
+            - node
+          script:
+            - npm i
+            - npm run cred:test
+            - npm run deploy:test

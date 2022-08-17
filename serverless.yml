@@ -1,0 +1,455 @@
+service: truckload-admin-backend
+useDotenv: true
+variablesResolutionMode: 20210326
+package:
+  individually: true
+
+
+disabledDeprecations:
+  - '*'
+
+deprecationNotificationMode: error
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-dotenv-plugin
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  tableName: ${self:custom.stage}-truckload
+
+  #domain for prod
+  customDomain:
+    domainName: api.truckload.trukiot.com
+    basePath: 'v3'
+    stage: ${opt:stage, self:provider.stage}
+    certificateName: trukiot.com
+    createRoute53Record: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: staging
+  region: ap-southeast-1
+
+  environment:
+    tableName: ${self:custom.tableName}
+    USERPOOLID: 'ap-southeast-1_z6BMZyIM9'
+    USERPOOLREGION: 'ap-southeast-1'
+
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - cognito-sync:*
+      - cognito-identity:*
+      Resource: arn:aws:cognito-identity:*:*:*
+    - Effect: Allow
+      Action:
+      - cognito-idp:*
+      Resource: arn:aws:cognito-idp:*:*:*
+
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.tableName}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.tableName}/index/*"
+
+functions:
+
+  # function for adding an order and challan
+
+  add-order-challan:
+    handler: api/add-order-challan.main
+    description: POST /order-challan
+    events:
+      - http:
+          path: order-challan
+          method: post
+          cors: true
+
+
+  # function for adding customer
+  add-customer:
+    handler: api/add-customer.main
+    description: POST /customer
+    events:
+      - http:
+          path: customer
+          method: post
+          cors: true
+
+
+  # function for adding driver
+  add-driver:
+    handler: api/add-driver.main
+    description: POST /driver
+    events:
+      - http:
+          path: driver
+          method: post
+          cors: true
+
+  #function for adding product
+  add-product:
+    handler: api/add-product.main
+    description: POST /product
+    events:
+      - http:
+          path: product
+          method: post
+          cors: true
+
+  # function for adding vendor
+  add-vendor:
+    handler: api/add-vendor.main
+    description: POST /vendor
+    events:
+      - http:
+          path: vendor
+          method: post
+          cors: true
+
+  # function for adding trucks
+  add-truck:
+    handler: api/add-truck.main
+    description: POST /truck
+    events:
+      - http:
+          path: truck
+          method: post
+          cors: true
+
+  # function for adding trips
+  add-trip:
+    handler: api/add-trip.main
+    description: POST /trip
+    events:
+      - http:
+          path: trip
+          method: post
+          cors: true
+
+  #function for adding single trip with details
+  add-single-trip:
+    handler: api/add-single-trip.main
+    description: POST /add-trip
+    events:
+      - http:
+          path: add-trip
+          method: post
+          cors: true
+
+
+  amplify-lambda-trigger:
+    handler: api/amplify-lambda-trigger.main
+    events:
+      - cognitoUserPool:
+          pool: dev-user-pool
+          trigger: PostConfirmation
+
+
+  # function for adding lease of trucks to an order
+  add-lease:
+    handler: api/add-lease.main
+    description: POST /lease
+    events:
+      - http:
+          path: lease
+          method: post
+          cors: true
+
+
+
+  # function for all
+  get-all:
+    handler: api/get-all.main
+    description: GET /all
+    events:
+      - http:
+          path: all
+          method: get
+          cors: true
+
+
+  # function for getting by status
+  get-status:
+    handler: api/get-status.main
+    description: GET /status
+    events:
+      - http:
+          path: status
+          method: get
+          cors: true
+
+  # function for getting by status
+  get-truck-status:
+    handler: api/get-truck-status.main
+    description: GET /truck-status
+    events:
+      - http:
+          path: truck-status
+          method: get
+          cors: true
+
+  # function for getting by status-challan
+  get-status-challan:
+    handler: api/get-status-challan.main
+    description: GET /status-challan
+    events:
+      - http:
+          path: status-challan
+          method: get
+          cors: true
+
+  # function for getting by status
+  get-object-info:
+    handler: api/get-object-info.main
+    description: GET /object
+    events:
+      - http:
+          path: object
+          method: get
+          cors: true
+
+  # function for all by customers
+  get-customer-order:
+    handler: api/get-customer-order.main
+    description: GET /customer/orders
+    events:
+      - http:
+          path: /customer/orders
+          method: get
+          cors: true
+
+  # function for all by customers
+  get-customer-trip-count:
+    handler: api/get-customer-trip-count.main
+    description: GET /admin/customer-trip-count
+    events:
+      - http:
+          path: /admin/customer-trip-count
+          method: get
+          cors: true
+
+  get-all-order-status:
+    handler: api/get-all-order-status.main
+    description: GET /admin/all-order-status
+    events:
+      - http:
+          path: /admin/all-order-status
+          method: get
+          cors: true
+
+
+  # function for all by customers
+  get-total-truck-trip:
+    handler: api/get-total-truck-trip.main
+    description: GET /admin/total-truck-trip
+    events:
+      - http:
+          path: /admin/total-truck-trip
+          method: get
+          cors: true
+
+
+  # function for getting target range
+  get-trip-graph:
+    handler: api/get-trip-graph.main
+    description: GET /admin/trip-graph
+    events:
+      - http:
+          path: /admin/trip-graph
+          method: get
+          cors: true
+
+  # trip graph for client
+  get-client-trip-graph:
+    handler: api/get-client-trip-graph.main
+    description: GET /g/c/trip
+    events:
+      - http:
+          path: /g/c/trip
+          method: get
+          cors: true
+
+  # function for all by customers
+  get-client-total-trip:
+    handler: api/get-client-total-trip.main
+    description: GET /client/total-trip-count
+    events:
+      - http:
+          path: /client/total-trip-count
+          method: get
+          cors: true
+
+   # function for all by customers
+  get-client-truck-trip:
+    handler: api/get-client-truck-trip.main
+    description: GET /client/total-truck-trip-count
+    events:
+      - http:
+          path: /client/total-truck-trip-count
+          method: get
+          cors: true
+  # function for all by customers
+  get-client-status-trip:
+    handler: api/get-client-status-trip.main
+    description: GET /s/c/trip
+    events:
+      - http:
+          path: /s/c/trip
+          method: get
+          cors: true
+
+  # function for all by customers
+  get-client-status-count:
+    handler: api/get-client-status-count.main
+    description: GET /c/c/status
+    events:
+      - http:
+          path: /c/c/status
+          method: get
+          cors: true
+
+
+    # function for  get all ordertoday, lastwk,lastMonth customer
+  get-order-by-date:
+    handler: api/get-order-by-date.main
+    description: GET /order-by-date
+    events:
+      - http:
+          path: /order-by-date
+          method: get
+          cors: true
+
+    # function for updating customer
+  update-customer:
+    handler: api/update-customer2.main
+    description: PATCH /update-customer
+    events:
+      - http:
+          path: /update-customer
+          method: patch
+          cors: true
+
+    # function for updating vendor
+  update-vendor:
+    handler: api/update-vendor.main
+    description: PATCH /update-vendor
+    events:
+      - http:
+          path: /update-vendor
+          method: patch
+          cors: true
+
+    # function for updating driver
+  update-driver:
+    handler: api/update-driver.main
+    description: PATCH /update-driver
+    events:
+      - http:
+          path: /update-driver
+          method: patch
+          cors: true
+    # function for updating vendor
+  update-truck:
+    handler: api/update-truck.main
+    description: PATCH /update-truck
+    events:
+      - http:
+          path: /update-truck
+          method: patch
+          cors: true
+
+
+  # function for updating status
+  update-status:
+    handler: api/update-status.main
+    description: PATCH /status
+    events:
+      - http:
+          path: status
+          method: patch
+          cors: true
+
+  update-status-challan:
+    handler: api/update-status-challan.main
+    description: PATCH /status-challan
+    events:
+      - http:
+          path: status-challan
+          method: patch
+          cors: true
+
+  # function for updating status
+  update-order:
+    handler: api/update-order.main
+    description: PATCH /order
+    events:
+      - http:
+          path: order
+          method: patch
+          cors: true
+  # function for updating update-lease
+  update-lease:
+    handler: api/update-lease.main
+    description: PATCH /update-lease
+    events:
+      - http:
+          path: update-lease
+          method: patch
+          cors: true
+
+  delete-object:
+    handler: api/delete-object.main
+    description: delete /delete-object
+    events:
+      - http:
+          path: /delete-object
+          method: delete
+          cors: true
+
+  remove-lease-data:
+    handler: api/remove-lease-data.main
+    description: PATCH /remove-lease-data
+    events:
+      - http:
+          path: remove-lease-data
+          method: patch
+          cors: true
+
+  get-customer-trips:
+    handler: api/get-customer-trips.main
+    description: GET /customer/trips
+    events:
+      - http:
+          path: /customer/trips
+          method: get
+          cors: true
+
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB
+  - ${file(resources/dynamodb-table.yml)}
+    # S3
+  - ${file(resources/s3-bucket.yml)}
+  # Cognito
+  - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/cognito-identity-pool.yml)}

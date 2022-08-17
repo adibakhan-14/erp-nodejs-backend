@@ -1,0 +1,38 @@
+{
+  "name": "truckload-admin-backend",
+  "version": "1.1.0",
+  "description": "truckload backend with the Serverless Framework with async/await and unit test support",
+  "main": "handler.js",
+  "scripts": {
+    "bundle:test": "serverless-bundle test",
+    "deploy:dev": "serverless deploy --stage dev",
+    "cred:dev": "serverless config credentials --stage dev --provider aws --key ${AWS_KEY} --secret ${AWS_SECRET}",
+    "deploy:stage": "serverless deploy --stage staging",
+    "cred:stage": "serverless config credentials --stage staging --provider aws --key ${AWS_KEY} --secret ${AWS_SECRET}",
+    "deploy:test": "serverless deploy --stage test",
+    "cred:test": "serverless config credentials --stage test --provider aws --key ${AWS_KEY} --secret ${AWS_SECRET}",
+    "deploy:prod": "serverless deploy --stage prod",
+    "cred:prod": "serverless config credentials --stage prod --provider aws --key ${AWS_KEY} --secret ${AWS_SECRET}",
+    "sls:dev": "serverless offline start"
+  },
+  "author": "S.M. Shahriar Rezwan",
+  "license": "ERA",
+  "repository": {
+    "type": "git",
+    "url": "https://Shahrair701@bitbucket.org/erainfotechbd/smarttruck-backend.git"
+  },
+  "devDependencies": {
+    "aws-sdk": "2.536.0",
+    "serverless": "^1.83.3",
+    "serverless-bundle": "1.2.2",
+    "serverless-dotenv-plugin": "^2.1.1",
+    "serverless-offline": "5.3.3"
+  },
+  "dependencies": {
+    "abbreviate": "0.0.3",
+    "moment": "2.25.3",
+    "moment-timezone": "^0.5.31",
+    "serverless-domain-manager": "4.1.1",
+    "uuid": "3.3.3"
+  }
+}
